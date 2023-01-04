@@ -118,10 +118,13 @@ public class MainWindow extends javax.swing.JFrame {
     }
     private void nextbtnActionPerformed(java.awt.event.ActionEvent evt){
         if( hostoption.isSelected() ){
-            // TO add server pageZ
+            ServerConfig serverPage = new ServerConfig();
+            serverPage.start();
         } else {
-            // To add client page
+            ClientConnection clientPage = new ClientConnection();
+            clientPage.start();
         }
+        this.dispose();
     }
 
     private void hostoptionActionPerformed(java.awt.event.ActionEvent evt) {                                           

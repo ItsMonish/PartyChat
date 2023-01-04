@@ -355,7 +355,7 @@ public class ServerChat extends javax.swing.JFrame {
         // TODO add your handling code here:
     }
 
-    public static void main(String args[]) {
+    public void start() {
 
         try {
             javax.swing.UIManager.setLookAndFeel(FlatDarkLaf.class.getName());
@@ -385,7 +385,7 @@ public class ServerChat extends javax.swing.JFrame {
     }
 
 
-    private javax.swing.JTextArea chatBox;
+    javax.swing.JTextArea chatBox;
     private javax.swing.JButton closeServer;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -404,15 +404,15 @@ public class ServerChat extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextArea privateChatWindow;
+    javax.swing.JTextArea privateChatWindow;
     private javax.swing.JTextField privateMessage;
     private javax.swing.JButton privateSendButton;
     private javax.swing.JTextField searchUsers;
     private javax.swing.JButton sendButton;
     private javax.swing.JTextField sendMessage;
-    private javax.swing.JLabel serverName;
-    private javax.swing.JLabel serverPass;
-    private javax.swing.JLabel serverStatus;
+    javax.swing.JLabel serverName;
+    javax.swing.JLabel serverPass;
+    javax.swing.JLabel serverStatus;
     private javax.swing.JComboBox<String> userListComboBox;
 
 }

@@ -4,6 +4,8 @@
 package partychat;
 
 public class App {
+
+    public static ControlServer serverControls;
     public static void main(String[] args) {
         MainWindow mainobj = new MainWindow();
         mainobj.start();

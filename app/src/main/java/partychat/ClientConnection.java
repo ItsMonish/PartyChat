@@ -110,7 +110,7 @@ public class ClientConnection extends javax.swing.JFrame {
     }
 
 
-    public static void main(String args[]) {
+    public void start() {
 
         try {
             javax.swing.UIManager.setLookAndFeel(FlatDarkLaf.class.getName());
