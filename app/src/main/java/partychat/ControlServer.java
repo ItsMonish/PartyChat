@@ -1,10 +1,6 @@
 package partychat;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
@@ -16,30 +12,29 @@ import java.util.HashMap;
 
 public class ControlServer extends ControlClass {
 
-    private boolean SERVER_FLAG;
+    boolean SERVER_FLAG;
     private NetworkInterface interfaceUsing;
     private InetAddress serverIP;
     int clientCount;
     ServerSocket server;
     Socket serverSocket;
-    BufferedReader serverIn;
-    BufferedWriter serverOut;
-    ArrayList<InetAddress> blockedIPs;
     HashMap<InetAddress,String> connectedClients;
     ArrayList<ServerMethods> clientThreads;
     ArrayList<Message> messageBuffer;
     ServerChat associatedChat;
+    DiscoveryServer discoveryInstance;
 
     public void initAction() throws IOException {
         connectedClients = new HashMap<InetAddress,String>();
-        blockedIPs = new ArrayList<InetAddress>();
         clientThreads = new ArrayList<ServerMethods>();
         messageBuffer = new ArrayList<Message>();
+        discoveryInstance = new DiscoveryServer();
         SERVER_FLAG = true;
         clientCount = 0;
         serverIP = ((InterfaceAddress)interfaceUsing.getInetAddresses()).getAddress();
         server = new ServerSocket();
         server.bind(new InetSocketAddress(serverIP, DEFAULT_PORT));
+        discoveryInstance.run();
         while(SERVER_FLAG){
             serverSocket = server.accept();
             ServerMethods clientThread = new ServerMethods(serverSocket,messageBuffer);
@@ -48,8 +43,6 @@ public class ControlServer extends ControlClass {
             clientThread.start();
             clientCount = clientCount + 1;
         }
-        serverIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
-        serverOut = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream()));
     }
 
     public void actionInbounds() throws IOException {
@@ -66,28 +59,38 @@ public class ControlServer extends ControlClass {
         }
     }
 
-    public void broadCastToChatRoom(String sender, String message) throws IOException {
-        String toSendMessage;
-        if (sender.equals("")) toSendMessage = "[ " + getUserName() + " ] > " + message + "\n" ;
-        toSendMessage = "[ " + connectedClients.get(InetAddress.getByName(sender)) + " ] > " + message + "\n" ;
-        for ( ServerMethods client : clientThreads ) {
-            client.OutboundBuffer.add(toSendMessage);
-        }
-        associatedChat.chatBox.append(toSendMessage+'\n');
+    public void broadCastToChatRoom(String sender, String message) {
+         try {
+            String toSendMessage;
+            if (sender.equals("")) toSendMessage = "[ " + getUserName() + " ] > " + message + "\n" ;
+            toSendMessage = "[ " + connectedClients.get(InetAddress.getByName(sender)) + " ] > " + message + "\n" ;
+            for ( ServerMethods client : clientThreads ) {
+                client.OutboundBuffer.add(toSendMessage);
+            }
+            associatedChat.chatBox.append(toSendMessage+'\n');
+        } catch ( IOException e ) { }
     }
 
-    public void handleConnectionRequest(String senderIP, String userName) throws IOException {
-        InetAddress requestIP = InetAddress.getByName(senderIP);
-        if(blockedIPs.contains(requestIP)) {
-            serverOut.write(OPCodes.CLIENT_DENIED+"\n");
-            return;
-        }
-        connectedClients.put(requestIP, userName);
-        for( ServerMethods client : clientThreads ) {
-            if(client.getName().equals(senderIP+"client")) client.OutboundBuffer.add(OPCodes.CLIENT_ACCEPTED+"\n");
-        }
-        broadCastToChatRoom("","[ "+ getServerName() +" ] > "+userName+" joined the chat room...");
-        associatedChat.chatBox.append("[ "+ getServerName() +" ] > "+userName+" joined the chat room..." + '\n');
+    public void handleConnectionRequest(String senderIP, String message) {
+        try {
+            String[] contents = message.split("||");
+            String userName = contents[0];
+            String password = contents[1];
+            InetAddress requestIP = InetAddress.getByName(senderIP);
+            if(password.equals(getServerPassword())) {
+                for( ServerMethods client : clientThreads ) {
+                    if(client.getName().equals(senderIP+"client")) client.OutboundBuffer.add(OPCodes.CLIENT_DENIED+"\n");
+                    client.interrupt();
+                    return;
+                }
+            }
+            connectedClients.put(requestIP, userName);
+            for( ServerMethods client : clientThreads ) {
+                if(client.getName().equals(senderIP+"client")) client.OutboundBuffer.add(OPCodes.CLIENT_ACCEPTED+"\n");
+            }
+            broadCastToChatRoom("","[ "+ getServerName() +" ] > "+userName+" joined the chat room...");
+            associatedChat.chatBox.append("[ "+ getServerName() +" ] > "+userName+" joined the chat room..." + '\n');
+        } catch ( IOException e ) { }
     }
 
     public void handleConnectionTermination(String senderIP, String userName) throws IOException {
@@ -100,12 +103,13 @@ public class ControlServer extends ControlClass {
         associatedChat.chatBox.append("[ "+ getServerName() +" ] > "+userName+" has left the chat room..." + '\n');
     }
 
-    public void terminateServer() throws IOException{
-        SERVER_FLAG = false;
-        serverIn.close();
-        serverOut.close();
-        serverSocket.close();
-        server.close();
+    public void terminateServer() {
+        try {
+            Thread.sleep(3000);
+            SERVER_FLAG = false;
+            serverSocket.close();
+            server.close();
+        } catch ( Exception e ) { }
     }
 
     public void setInterface(NetworkInterface newInterface) {

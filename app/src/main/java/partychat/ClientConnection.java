@@ -1,4 +1,7 @@
 package partychat;
+
+import java.net.SocketException;
+import javax.swing.JOptionPane;
 import com.formdev.flatlaf.FlatDarkLaf;
 
 public class ClientConnection extends javax.swing.JFrame {
@@ -7,6 +10,11 @@ public class ClientConnection extends javax.swing.JFrame {
     public ClientConnection() {
         initComponents();
         serverPassword.setEnabled(false);
+        jButton2.setEnabled(false);
+        DISCOVERY_FLAG = true;
+        try {
+            discovery = new DiscoveryClient();
+        } catch ( SocketException e ) {}
     }
 
     private void initComponents() {
@@ -27,11 +35,6 @@ public class ClientConnection extends javax.swing.JFrame {
         jLabel1.setFont(jLabel1.getFont());
         jLabel1.setText("Select a Server to Join In:");
 
-        serverLists.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         serverLists.setFixedCellWidth(200);
         serverLists.setVisibleRowCount(-1);
         serverLists.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
@@ -51,6 +54,11 @@ public class ClientConnection extends javax.swing.JFrame {
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         jButton2.setText("Connect");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jLabel3.setFont(jLabel3.getFont());
         jLabel3.setText("Enter UserName:");
@@ -107,6 +115,31 @@ public class ClientConnection extends javax.swing.JFrame {
 
     private void serverListsValueChanged(javax.swing.event.ListSelectionEvent evt) {
         serverPassword.setEnabled(true);
+        jButton2.setEnabled(true);
+    }
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
+        try {
+            String selectedServer = serverLists.getSelectedValue();
+            String password = new String(serverPassword.getPassword());
+            String clientName = userName.getText();
+            ControlClient newClient = new ControlClient(discovery.serversIP.get(selectedServer));
+            newClient.setServerName(selectedServer);
+            newClient.setServerPassword(password);
+            newClient.setUserName(clientName);
+            newClient.setUserClient();
+            ClientChat newClientChat = new ClientChat();
+            newClientChat.associatedClient = newClient;
+            int res = newClient.createConnection(clientName,password);
+            if(res == 1) {
+                newClientChat.start();
+                this.dispose();
+            } else if (res == -1) {
+                JOptionPane.showMessageDialog(this, "The connection was refused. Please check your password.");
+            } else {
+                JOptionPane.showMessageDialog(this, "No reponse from server. Make sure it is up and try again");
+            }
+        } catch( Exception e ) { }
     }
 
 
@@ -135,9 +168,23 @@ public class ClientConnection extends javax.swing.JFrame {
                 new ClientConnection().setVisible(true);
             }
         });
+
+        new Thread(new Runnable() {
+            public void run(){
+                discovery.run();
+                while(DISCOVERY_FLAG) {
+                    serverLists.setListData(discovery.servers);
+                    try {
+                        Thread.sleep(5000);
+                    } catch (Exception e) { }
+                }
+            }
+        }).start();;
+
     }
 
-
+    private boolean DISCOVERY_FLAG;
+    DiscoveryClient discovery;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;

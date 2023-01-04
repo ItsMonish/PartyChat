@@ -41,6 +41,7 @@ public class ServerMethods extends Thread{
                     serverOut.write(OutboundBuffer.remove(0)+'\n');
                 }
                 if ( Thread.currentThread().isInterrupted() ) {
+                    Thread.sleep(2000);
                     serverIn.close();
                     serverOut.close();
                     thisSocket.close();
@@ -49,6 +50,8 @@ public class ServerMethods extends Thread{
             }
         } catch (IOException errIO) {
             errIO.printStackTrace();
+        } catch (InterruptedException IE) {
+            IE.printStackTrace();
         }
     }
 }

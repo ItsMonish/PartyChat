@@ -1,10 +1,21 @@
 package partychat;
+import javax.swing.JOptionPane;
+
 import com.formdev.flatlaf.FlatDarkLaf;
 
 public class ServerChat extends javax.swing.JFrame {
 
     public ServerChat() {
         initComponents();
+        serverName.setText(associatedServer.getServerName());
+        if ( associatedServer.getServerPassword().equals("") ) {
+            serverPass.setText("");
+            serverStatus.setText("Open Server");
+        } else {
+            serverPass.setText(associatedServer.getServerPassword());
+            serverStatus.setText("Closed with password");
+        }
+        jLabel6.setText(associatedServer.clientCount+"");
     }
 
     private void initComponents() {
@@ -15,17 +26,10 @@ public class ServerChat extends javax.swing.JFrame {
         sendButton = new javax.swing.JButton();
         jScrollPane4 = new javax.swing.JScrollPane();
         chatBox = new javax.swing.JTextArea();
-        jPanel3 = new javax.swing.JPanel();
-        userListComboBox = new javax.swing.JComboBox<>();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        privateChatWindow = new javax.swing.JTextArea();
-        privateMessage = new javax.swing.JTextField();
-        privateSendButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
-        jButton2 = new javax.swing.JButton();
         searchUsers = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -89,71 +93,9 @@ public class ServerChat extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Chat Room", jPanel1);
 
-        userListComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        userListComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                userListComboBoxActionPerformed(evt);
-            }
-        });
-
-        privateChatWindow.setEditable(false);
-        privateChatWindow.setColumns(20);
-        privateChatWindow.setLineWrap(true);
-        privateChatWindow.setRows(5);
-        jScrollPane3.setViewportView(privateChatWindow);
-
-        privateMessage.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                privateMessageKeyPressed(evt);
-            }
-        });
-
-        privateSendButton.setText("Send");
-        privateSendButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                privateSendButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 705, Short.MAX_VALUE)
-                    .addComponent(userListComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(privateMessage)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(privateSendButton)))
-                .addContainerGap())
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(userListComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(privateMessage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(privateSendButton))
-                .addContainerGap(10, Short.MAX_VALUE))
-        );
-
-        jTabbedPane1.addTab("Private Chat", jPanel3);
-
         jLabel1.setText("Users Connected:");
 
         jList1.setFont(jList1.getFont());
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jList1.setToolTipText("");
         jList1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jList1.setFixedCellHeight(30);
@@ -161,13 +103,6 @@ public class ServerChat extends javax.swing.JFrame {
         jList1.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
         jList1.setVisibleRowCount(-1);
         jScrollPane2.setViewportView(jList1);
-
-        jButton2.setText("Kick User");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
 
         searchUsers.setFont(searchUsers.getFont());
         searchUsers.setText("Search Users");
@@ -186,15 +121,9 @@ public class ServerChat extends javax.swing.JFrame {
 
         jLabel3.setText("Server Name:");
 
-        serverName.setText("jLabel4");
-
         jLabel4.setText("Server Password: ");
 
-        serverPass.setText("jLabel5");
-
         jLabel5.setText("Users Count: ");
-
-        jLabel6.setText("jLabel6");
 
         closeServer.setText("Destroy Server");
         closeServer.addActionListener(new java.awt.event.ActionListener() {
@@ -226,8 +155,7 @@ public class ServerChat extends javax.swing.JFrame {
                             .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                 .addComponent(searchUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
@@ -284,8 +212,7 @@ public class ServerChat extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addComponent(jButton2)))
+                        .addGap(24, 24, 24)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(closeServer)
@@ -319,44 +246,51 @@ public class ServerChat extends javax.swing.JFrame {
         searchUsers.setText("");
     }
 
-    private void userListComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void privateSendButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        associatedServer.broadCastToChatRoom("", sendMessage.getText());
     }
 
     private void searchUsersKeyTyped(java.awt.event.KeyEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        String query = searchUsers.getText();
+        String[] userNames = (String[])associatedServer.connectedClients.values().toArray();
+        String[] selected = new String[20];
+        int i = 0;
+        for(String name : userNames) {
+            if (name.contains(query)) {
+                selected[i] = name;
+                i = i + 1;
+            }
+        }
+        jList1.setListData(selected);
     }
 
     private void closeServerActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        int res = JOptionPane.showConfirmDialog(this, "Are You sure you want to close the server ?");
+        if( res == JOptionPane.YES_OPTION ) {
+            associatedServer.SERVER_FLAG = false;
+            associatedServer.terminateServer();
+        }
     }
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void privateMessageKeyPressed(java.awt.event.KeyEvent evt) {
-        // TODO add your handling code here:
+        try {
+            if( associatedServer.discoveryInstance.DISCOVERY_FLAG ) {
+                associatedServer.discoveryInstance.DISCOVERY_FLAG = false;
+                associatedServer.discoveryInstance.wait();
+            } else {
+                associatedServer.discoveryInstance.DISCOVERY_FLAG = true;
+                associatedServer.discoveryInstance.notify();
+            }
+        } catch (Exception e) { }
     }
 
     private void sendMessageKeyPressed(java.awt.event.KeyEvent evt) {
-        // TODO add your handling code here:
+        if ( evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+            associatedServer.broadCastToChatRoom("", sendMessage.getText());
+        }
     }
 
     public void start() {
-
         try {
             javax.swing.UIManager.setLookAndFeel(FlatDarkLaf.class.getName());
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -382,13 +316,25 @@ public class ServerChat extends javax.swing.JFrame {
                 new ServerChat().setVisible(true);
             }
         });
+
+        new Thread( new Runnable() {
+            public void run() {
+                while(associatedServer.SERVER_FLAG) {
+                    jList1.setListData((String[])associatedServer.connectedClients.values().toArray());
+                    try {
+                        Thread.sleep(5000);
+                    } catch ( InterruptedException e ) { }
+                }
+          }  
+        }).start();
+
     }
 
 
+    ControlServer associatedServer;
     javax.swing.JTextArea chatBox;
     private javax.swing.JButton closeServer;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -399,20 +345,14 @@ public class ServerChat extends javax.swing.JFrame {
     private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane1;
-    javax.swing.JTextArea privateChatWindow;
-    private javax.swing.JTextField privateMessage;
-    private javax.swing.JButton privateSendButton;
     private javax.swing.JTextField searchUsers;
     private javax.swing.JButton sendButton;
     private javax.swing.JTextField sendMessage;
-    javax.swing.JLabel serverName;
-    javax.swing.JLabel serverPass;
-    javax.swing.JLabel serverStatus;
-    private javax.swing.JComboBox<String> userListComboBox;
+    private javax.swing.JLabel serverName;
+    private javax.swing.JLabel serverPass;
+    private javax.swing.JLabel serverStatus;
 
 }

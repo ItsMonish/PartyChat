@@ -145,12 +145,18 @@ public class ServerConfig extends javax.swing.JFrame {
     }
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
-        App.serverControls = new ControlServer();
-        App.serverControls.setUserServer();
-        App.serverControls.setServerName(serverName.getText());
-        App.serverControls.setServerPassword(serverPass.getText());
-        App.serverControls.associatedChat = new ServerChat();
-        App.serverControls.associatedChat.start();
+        ControlServer newServer = new ControlServer();
+        ServerChat newServerChat = new ServerChat();
+        newServer.setUserServer();
+        if( openServerCheckbox.isSelected() ) {
+            newServer.setServerPassword("");
+        } else {
+            newServer.setServerPassword(serverPass.getText());
+        }
+        newServer.setServerName(serverName.getText());
+        newServer.setUserName(serverUserName.getText());
+        newServerChat.associatedServer = newServer;
+        newServerChat.start();
         this.dispose();
     }
 
