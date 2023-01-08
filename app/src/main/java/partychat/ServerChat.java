@@ -7,7 +7,6 @@ public class ServerChat extends javax.swing.JFrame {
 
     public ServerChat(ControlServer associated) {
         initComponents();
-        System.out.println("Server Chat inited");
         this.associatedServer = associated;
         serverName.setText(associatedServer.getServerName());
         if ( associatedServer.getServerPassword().equals("") ) {

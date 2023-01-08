@@ -174,7 +174,6 @@ public class ClientChat extends javax.swing.JFrame {
     }
 
     public void start() {
-        System.out.println("Starting client chat");
         associatedClient.associatedChat = this;
         try {
             javax.swing.UIManager.setLookAndFeel(FlatDarkLaf.class.getName());

@@ -48,7 +48,6 @@ public class ControlServer extends ControlClass {
             server.bind(new InetSocketAddress(serverIP, DEFAULT_PORT));
             discoveryInstance.setDiscoveryInterface(interfaceUsing);
             discoveryInstance.setAssociatedServer(this);
-            System.out.println("DEBUG:\n\tServer Name:"+getServerName()+"\n\tUserName:"+getUserName()+"\n\tServerIP:"+serverIP.toString());
 
             discoveryThread = new Thread(new Runnable() {
                public void run() {
@@ -60,13 +59,11 @@ public class ControlServer extends ControlClass {
                } 
             });
             discoveryThread.start();
-            System.out.println("Discovery Instance started");
             serverConnectionThread = new Thread(new Runnable() {
                public void run() {
                     while(SERVER_FLAG){
                         try {
                             serverSocket = server.accept();
-                            System.out.println("Connection made with "+serverSocket.getInetAddress().toString());
                             ServerMethods clientMethods = new ServerMethods(serverSocket,self);
                             Thread clientThread = new Thread(new Runnable() {
                                 public void run() {
@@ -84,17 +81,13 @@ public class ControlServer extends ControlClass {
                 } 
             });
             serverConnectionThread.start();
-            System.out.println("Server listening for connections");
         } catch (Exception e) { e.printStackTrace(); }
     }
 
     public void actionInbounds() {
         try {
             while(SERVER_FLAG) {
-                if( messageBuffer.size() != 0 ) System.out.println("Buffer size is:"+messageBuffer.size());
                 if( messageBuffer.size() != 0 ) {
-                    System.out.println("new message in buffer");
-                    System.out.println("Message:"+messageBuffer.get(0).getMessage());
                     Message newMsg = messageBuffer.remove(0);
                     char thisOP = newMsg.getOP();
                     InetAddress thisSender = newMsg.getSenderIP();
@@ -114,7 +107,6 @@ public class ControlServer extends ControlClass {
             else if (sender == InetAddress.getByName("localhost")) toSendMessage = message + "\n";
             else toSendMessage = "[ " + connectedClients.get(sender) + " ] > " + message + "\n" ;
             for ( ServerMethods client : clientThreads.values() ) {
-                System.out.println("Sending message to "+client.associatedIP+" content:"+toSendMessage);
                 client.serverOut.println(toSendMessage);
             }
             associatedChat.chatBox.append(toSendMessage);
@@ -126,9 +118,7 @@ public class ControlServer extends ControlClass {
         String[] contents = message.split("::");
         String userName = contents[0];
         String password = null;
-        System.out.println("Username:"+userName);
         if( contents.length > 1 ) password = contents[1];
-        System.out.println("Password:"+password);
         if(password != null && !password.equals(getServerPassword())) {
             for( Thread client : clientThreads.keySet() ) {
                 if(client.getName().equals(senderIP+"client")) clientThreads.get(client).serverOut.println(OPCodes.CLIENT_DENIED+"");
@@ -139,10 +129,8 @@ public class ControlServer extends ControlClass {
         connectedClients.put(senderIP, userName);
         for( Thread client : clientThreads.keySet() ) {
             if(client.getName().equals(senderIP+"client")){ 
-                System.out.println("Sending response to "+clientThreads.get(client).associatedIP);
                 clientThreads.get(client).serverOut.println(OPCodes.CLIENT_ACCEPTED+"");
             }
-            System.out.println("Sent response:"+OPCodes.CLIENT_ACCEPTED);
         }
         try {
             broadCastToChatRoom(InetAddress.getByName("localhost"),"[ "+ getServerName() +" ] > "+userName+" joined the chat room...");
@@ -167,7 +155,6 @@ public class ControlServer extends ControlClass {
             for ( Thread client : clientThreads.keySet() ) {
                 client.interrupt();
             }
-            System.out.print("Server being terminated");
             Thread.sleep(3000);
             discoveryThread.interrupt();
             serverConnectionThread.interrupt();

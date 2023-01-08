@@ -128,20 +128,15 @@ public class ClientConnection extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             String selectedServer = serverLists.getSelectedValue();
-            System.out.println("Selected value:"+selectedServer);
             String password = new String(serverPassword.getPassword());
             String clientName = userName.getText();
-            System.out.println("Selected username:"+clientName);
-            System.out.println("IP:"+discovery.serversIP.get(selectedServer).toString());
             ControlClient newClient = new ControlClient(discovery.serversIP.get(selectedServer));
             newClient.setServerName(selectedServer);
             newClient.setServerPassword(password);
             newClient.setUserName(clientName);
             newClient.setUserClient();
             ClientChat newClientChat = new ClientChat(newClient);
-            System.out.println("Initiating connection request");
             int res = newClient.createConnection(clientName,password);
-            System.out.println("Response for connection:"+res);
             if(res == 1) {
                 newClientChat.start();
                 this.dispose();

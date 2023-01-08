@@ -29,7 +29,6 @@ public class DiscoveryServer {
 
     public void initDiscovery() {
         try {
-            System.out.println("Interface in use: "+thisInterface.getName());
             while(DISCOVERY_FLAG) {
                 byte[] buffer = new byte[100];
                 DatagramPacket recieved = new DatagramPacket(buffer, 100);

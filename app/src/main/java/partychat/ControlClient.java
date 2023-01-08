@@ -26,9 +26,7 @@ public class ControlClient extends ControlClass {
 
     public int createConnection(String userName, String password) throws IOException {
         socketOut.println(OPCodes.CONNECTION_REQUEST + userName+"::"+password);
-        System.out.println("wrote to server buffer");
         String response = socketIn.readLine();
-        System.out.println("Response recieved is :"+response);
         if( response.equals((OPCodes.CLIENT_ACCEPTED+"")) ) {
             return 1;
         } else if ( response.equals(OPCodes.CLIENT_DENIED+"") ) { 
@@ -47,7 +45,6 @@ public class ControlClient extends ControlClass {
             String inboundMessage;
             try {
                 inboundMessage = socketIn.readLine();
-                System.out.println("Recieved:"+inboundMessage);
                 associatedChat.chatRoom.append(inboundMessage+"\n");
             } catch (IOException e) { e.printStackTrace(); }
         }
