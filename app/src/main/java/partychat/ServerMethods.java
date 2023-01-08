@@ -26,7 +26,7 @@ public class ServerMethods{
         try {
             while(true) {
                 String InboundMessage;
-                if((InboundMessage = serverIn.readLine()) != null){
+                if((InboundMessage = serverIn.readLine()) != null) {
                     Message newmsg = new Message();
                     newmsg.setOP(InboundMessage.charAt(0));
                     newmsg.setSender(associatedIP);
@@ -34,17 +34,12 @@ public class ServerMethods{
                     associatedServer.messageBuffer.add(newmsg);
                 }
                 if ( Thread.currentThread().isInterrupted() ) {
-                    Thread.sleep(2000);
                     serverIn.close();
                     serverOut.close();
                     thisSocket.close();
                     break;
                 }
             }
-        } catch (IOException errIO) {
-            errIO.printStackTrace();
-        } catch (InterruptedException IE) {
-            IE.printStackTrace();
-        }
+        } catch (IOException errIO) { }
     }
 }

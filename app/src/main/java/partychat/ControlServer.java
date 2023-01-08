@@ -19,7 +19,7 @@ public class ControlServer extends ControlClass {
     boolean SERVER_FLAG;
     private NetworkInterface interfaceUsing;
     private InetAddress serverIP;
-    private Thread discoveryThread;
+    Thread discoveryThread;
     private Thread serverConnectionThread;
     int clientCount;
     ServerSocket server;
@@ -74,14 +74,12 @@ public class ControlServer extends ControlClass {
                             clientThreads.put(clientThread,clientMethods);
                             clientThread.start();
                             clientCount = clientCount + 1;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        } catch (Exception e) { }
                     }
                 } 
             });
             serverConnectionThread.start();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { }
     }
 
     public void actionInbounds() {
@@ -97,7 +95,7 @@ public class ControlServer extends ControlClass {
                     else if(thisOP == OPCodes.CLIENT_CONNECTION_TERMINATION) handleConnectionTermination(thisSender, Message);
                 }
             }
-        } catch ( Exception e ) { e.printStackTrace(); }
+        } catch ( Exception e ) { }
     }
 
     public void broadCastToChatRoom(InetAddress sender, String message) {
@@ -114,7 +112,6 @@ public class ControlServer extends ControlClass {
     }
 
     public void handleConnectionRequest(InetAddress senderIP, String message) {
-        System.out.println("Lets see..."+message);
         String[] contents = message.split("::");
         String userName = contents[0];
         String password = null;
@@ -134,9 +131,7 @@ public class ControlServer extends ControlClass {
         }
         try {
             broadCastToChatRoom(InetAddress.getByName("localhost"),"[ "+ getServerName() +" ] > "+userName+" joined the chat room...");
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        } catch (UnknownHostException e) { }
     }
 
     public void handleConnectionTermination(InetAddress senderIP, String userName) throws IOException {
@@ -145,21 +140,21 @@ public class ControlServer extends ControlClass {
             if( client.getName().equals(requestIP+"client") ) client.interrupt();
         }
         connectedClients.remove(requestIP, userName);
-        broadCastToChatRoom(null, "[ " + getServerName() + " ] > "+ userName+ " has left the chat room");
-        associatedChat.chatBox.append("[ "+ getServerName() +" ] > "+userName+" has left the chat room..." + '\n');
+        broadCastToChatRoom(InetAddress.getByName("localhost"), "[ " + getServerName() + " ] > "+ userName+ " has left the chat room");
+        clientCount = clientCount - 1;
     }
 
     public void terminateServer() {
         try {
             SERVER_FLAG = false;
             for ( Thread client : clientThreads.keySet() ) {
+                clientThreads.get(client).serverOut.println(OPCodes.SERVER_CONNECTION_TERMINATION+serverIP.toString());
                 client.interrupt();
             }
-            Thread.sleep(3000);
             discoveryThread.interrupt();
             serverConnectionThread.interrupt();
             server.close();
-        } catch ( Exception e ) { e.printStackTrace(); }
+        } catch ( Exception e ) { }
     }
 
     public void setInterface(NetworkInterface newInterface) {

@@ -1,4 +1,5 @@
 package partychat;
+import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 
 import com.formdev.flatlaf.FlatDarkLaf;
@@ -8,6 +9,7 @@ public class ServerChat extends javax.swing.JFrame {
     public ServerChat(ControlServer associated) {
         initComponents();
         this.associatedServer = associated;
+        this.associatedServer.SERVER_FLAG = true;
         serverName.setText(associatedServer.getServerName());
         if ( associatedServer.getServerPassword().equals("") ) {
             serverPass.setText("");
@@ -30,8 +32,8 @@ public class ServerChat extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
-        searchUsers = new javax.swing.JTextField();
+        listModel = new DefaultListModel<String>();
+        jList1 = new javax.swing.JList<String>(listModel);
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         serverName = new javax.swing.JLabel();
@@ -42,7 +44,6 @@ public class ServerChat extends javax.swing.JFrame {
         closeServer = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         serverStatus = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -105,19 +106,6 @@ public class ServerChat extends javax.swing.JFrame {
         jList1.setVisibleRowCount(-1);
         jScrollPane2.setViewportView(jList1);
 
-        searchUsers.setFont(searchUsers.getFont());
-        searchUsers.setText("Search Users");
-        searchUsers.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                searchUsersFocusGained(evt);
-            }
-        });
-        searchUsers.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                searchUsersKeyTyped(evt);
-            }
-        });
-
         jLabel2.setText("Server Info:");
 
         jLabel3.setText("Server Name:");
@@ -137,13 +125,6 @@ public class ServerChat extends javax.swing.JFrame {
 
         serverStatus.setText("Open");
 
-        jButton1.setText("Close Server");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -158,7 +139,6 @@ public class ServerChat extends javax.swing.JFrame {
                                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(searchUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(jPanel2Layout.createSequentialGroup()
@@ -183,8 +163,7 @@ public class ServerChat extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(34, 34, 34)
                         .addComponent(closeServer)
-                        .addGap(26, 26, 26)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(26, 26, 26)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -207,7 +186,6 @@ public class ServerChat extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(searchUsers, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -216,9 +194,7 @@ public class ServerChat extends javax.swing.JFrame {
                         .addGap(24, 24, 24)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(closeServer)
-                    .addComponent(jButton1))
-                .addContainerGap(17, Short.MAX_VALUE))
+                    .addComponent(closeServer)))
         );
 
         jTabbedPane1.addTab("Adminstration Panel", jPanel2);
@@ -243,53 +219,24 @@ public class ServerChat extends javax.swing.JFrame {
         pack();
     }
 
-    private void searchUsersFocusGained(java.awt.event.FocusEvent evt) {
-        searchUsers.setText("");
-    }
-
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {
         associatedServer.broadCastToChatRoom(null, sendMessage.getText());
         sendMessage.setText("");
-    }
-
-    private void searchUsersKeyTyped(java.awt.event.KeyEvent evt) {
-        String query = searchUsers.getText();
-        String[] userNames = (String[])associatedServer.connectedClients.values().toArray();
-        String[] selected = new String[20];
-        int i = 0;
-        for(String name : userNames) {
-            if (name.contains(query)) {
-                selected[i] = name;
-                i = i + 1;
-            }
-        }
-        jList1.setListData(selected);
     }
 
     private void closeServerActionPerformed(java.awt.event.ActionEvent evt) {
         int res = JOptionPane.showConfirmDialog(this, "Are You sure you want to close the server ?");
         if( res == JOptionPane.YES_OPTION ) {
             associatedServer.SERVER_FLAG = false;
+            userListUpdationThread.interrupt();
             associatedServer.terminateServer();
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) { e.printStackTrace(); }
+            } catch (InterruptedException e) { }
             MainWindow obj = new MainWindow();
             obj.start();
             this.dispose();
         }
-    }
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
-        try {
-            if( associatedServer.discoveryInstance.DISCOVERY_FLAG ) {
-                associatedServer.discoveryInstance.DISCOVERY_FLAG = false;
-                associatedServer.discoveryInstance.wait();
-            } else {
-                associatedServer.discoveryInstance.DISCOVERY_FLAG = true;
-                associatedServer.discoveryInstance.notify();
-            }
-        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void sendMessageKeyPressed(java.awt.event.KeyEvent evt) {
@@ -326,26 +273,41 @@ public class ServerChat extends javax.swing.JFrame {
             }
         });
 
-        new Thread( new Runnable() {
+        inboundActionThread = new Thread( new Runnable() {
             public void run() {
                 associated.initAction();
                 associated.actionInbounds();
-                while(associatedServer.SERVER_FLAG) {
-                    jList1.setListData((String[])associatedServer.connectedClients.values().toArray());
-                    try {
-                        Thread.sleep(5000);
-                    } catch ( InterruptedException e ) { e.printStackTrace(); }
-                }
-          }  
-        }).start();
+            }  
+        });
+        inboundActionThread.start();
 
+        userListUpdationThread = new Thread(new Runnable() {
+            public void run() {
+                updateUserList();
+            }
+        });
+        userListUpdationThread.start();
+    }
+
+    public void updateUserList() {
+        while(associatedServer.SERVER_FLAG) {
+            listModel.removeAllElements();
+            for(String client : associatedServer.connectedClients.values()) listModel.addElement(client);
+            jLabel6.setText(associatedServer.clientCount+"");
+            try {
+                Thread.sleep(5000);
+            } catch ( InterruptedException e ) { }
+            if( Thread.interrupted() ) {
+                break;
+            }
+        }
     }
 
 
     ControlServer associatedServer;
     javax.swing.JTextArea chatBox;
+    Thread inboundActionThread,userListUpdationThread;
     private javax.swing.JButton closeServer;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -359,11 +321,10 @@ public class ServerChat extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextField searchUsers;
     private javax.swing.JButton sendButton;
     private javax.swing.JTextField sendMessage;
     private javax.swing.JLabel serverName;
     private javax.swing.JLabel serverPass;
     private javax.swing.JLabel serverStatus;
-
+    private javax.swing.DefaultListModel<String> listModel;
 }

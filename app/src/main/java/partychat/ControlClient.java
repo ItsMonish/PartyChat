@@ -45,17 +45,23 @@ public class ControlClient extends ControlClass {
             String inboundMessage;
             try {
                 inboundMessage = socketIn.readLine();
-                associatedChat.chatRoom.append(inboundMessage+"\n");
-            } catch (IOException e) { e.printStackTrace(); }
+                if(inboundMessage.equals(OPCodes.SERVER_CONNECTION_TERMINATION+serverIP.toString())) {
+                    associatedChat.serverTerminated();
+                    return;
+                }
+                associatedChat.chatRoom.append(inboundMessage);
+                associatedChat.jScrollPane1.getVerticalScrollBar().setValue(associatedChat.jScrollPane1.getMaximumSize().height);
+            } catch (IOException e) { }
         }
     }
 
     public void terminateConnection() {
         try {
-            socketOut.write(OPCodes.CLIENT_CONNECTION_TERMINATION+"");
+            CLIENT_FLAG = false;
+            socketOut.println(OPCodes.CLIENT_CONNECTION_TERMINATION+getUserName());
             socketIn.close();
             socketOut.close();
             connection.close();
-        } catch ( IOException e ) { e.printStackTrace(); }    
+        } catch ( IOException e ) { }    
     }
 }

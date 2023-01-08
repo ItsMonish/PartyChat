@@ -41,8 +41,6 @@ public class DiscoveryServer {
                     discoverySocket.send(response);
                 }
             }
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        }
+        } catch ( IOException e ) { }
     }
 }

@@ -7,7 +7,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class DiscoveryClient extends Thread {
+public class DiscoveryClient {
     ArrayList<String> serverlist;
     HashMap<String,InetAddress> serversIP;
     int count;
@@ -22,7 +22,7 @@ public class DiscoveryClient extends Thread {
         discoveryString = OPCodes.SERVER_DISCOVERY+"";
     }
 
-    public void run() {
+    public void initDiscovery() {
         try{
             InetAddress broadCastAddress = InetAddress.getByName("255.255.255.255");
             while(true) {
@@ -40,9 +40,8 @@ public class DiscoveryClient extends Thread {
                     serversIP.put(newServerName, newServerIP);
                     count = count + 1; 
                 }
-                Thread.sleep(1000);
             }
-        } catch( Exception e ) { e.printStackTrace(); } 
+        } catch( Exception e ) { } 
     }
 
 }

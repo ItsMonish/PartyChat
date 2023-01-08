@@ -139,13 +139,15 @@ public class ClientConnection extends javax.swing.JFrame {
             int res = newClient.createConnection(clientName,password);
             if(res == 1) {
                 newClientChat.start();
+                discoveryThread.interrupt();
+                discovery.clientSocket.close();
                 this.dispose();
             } else if (res == -1) {
                 JOptionPane.showMessageDialog(this, "The connection was refused. Please check your password.");
             } else {
                 JOptionPane.showMessageDialog(this, "No reponse from server. Make sure it is up and try again");
             }
-        } catch( Exception e ) { e.printStackTrace(); }
+        } catch( Exception e ) { }
     }
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -181,22 +183,21 @@ public class ClientConnection extends javax.swing.JFrame {
             }
         });
 
-        Thread discoveryThread = new Thread(new Runnable() {
+        discoveryThread = new Thread(new Runnable() {
             @Override public void run() {
-                discovery.run();
+                discovery.initDiscovery();
             }
         });
 
         new Thread(new Runnable() {
            @Override public void run() {
             while(DISCOVERY_FLAG) {
-                listModel.removeAllElements();
                 for(String name: discovery.serverlist) {
-                    listModel.addElement(name);
+                    if(!listModel.contains(name)) listModel.addElement(name);
                 }
                 try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e ) { e.printStackTrace(); }
+                    Thread.sleep(5000);
+                } catch (InterruptedException e ) { }
             }
            } 
         }).start();
@@ -204,6 +205,7 @@ public class ClientConnection extends javax.swing.JFrame {
         discoveryThread.start();
     }
 
+    Thread discoveryThread;
     private boolean DISCOVERY_FLAG;
     DiscoveryClient discovery;
     private javax.swing.JButton jButton1;
