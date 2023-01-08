@@ -4,10 +4,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DiscoveryClient extends Thread {
-    String servers[];
+    ArrayList<String> serverlist;
     HashMap<String,InetAddress> serversIP;
     int count;
     DatagramSocket clientSocket;
@@ -15,7 +16,8 @@ public class DiscoveryClient extends Thread {
 
     public DiscoveryClient() throws SocketException {
         count = 0;
-        servers = new String[10];
+        serversIP = new HashMap<String,InetAddress>();
+        serverlist = new ArrayList<String>();
         clientSocket = new DatagramSocket(2022);
         discoveryString = OPCodes.SERVER_DISCOVERY+"";
     }
@@ -24,18 +26,23 @@ public class DiscoveryClient extends Thread {
         try{
             InetAddress broadCastAddress = InetAddress.getByName("255.255.255.255");
             while(true) {
+                byte[] buffer = new byte[100];
                 DatagramPacket discoveryPacket = new DatagramPacket(discoveryString.getBytes(), discoveryString.length(), broadCastAddress, 2022);
                 clientSocket.send(discoveryPacket);
-                DatagramPacket response = new DatagramPacket(null, 10);
+                DatagramPacket response = new DatagramPacket(buffer, 100);
                 clientSocket.receive(response);
                 InetAddress newServerIP = response.getAddress();
                 String newServerName = new String(response.getData(),0,response.getLength()).trim();
-                if( !serversIP.containsValue(newServerIP) ) {
-                    servers[count] = newServerName;
+                if( newServerName.equalsIgnoreCase(discoveryString)) continue;
+                if( !serversIP.keySet().contains(newServerName) ) {
+                    serverlist.removeAll(serverlist);
+                    serverlist.add(newServerName);
                     serversIP.put(newServerName, newServerIP);
+                    count = count + 1; 
                 }
+                Thread.sleep(1000);
             }
-        } catch( Exception e ) { } 
+        } catch( Exception e ) { e.printStackTrace(); } 
     }
 
 }

@@ -5,8 +5,9 @@ import com.formdev.flatlaf.FlatDarkLaf;
 
 public class ClientChat extends javax.swing.JFrame {
 
-    public ClientChat() {
+    public ClientChat(ControlClient associated) {
         initComponents();
+        associatedClient = associated;
         serverName.setText(associatedClient.getServerName());
         userName.setText(associatedClient.getUserName());
     }
@@ -149,12 +150,14 @@ public class ClientChat extends javax.swing.JFrame {
     private void chatRoomSendButtonActionPerformed(java.awt.event.ActionEvent evt) {
         String message = chatRoomMessage.getText();
         associatedClient.sendMessage(message);
+        chatRoomMessage.setText("");
     }
 
     private void chatRoomMessageKeyPressed(java.awt.event.KeyEvent evt) {
         if ( evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
             String message = chatRoomMessage.getText();
             associatedClient.sendMessage(message);
+            chatRoomMessage.setText("");
         }
     }
 
@@ -171,7 +174,8 @@ public class ClientChat extends javax.swing.JFrame {
     }
 
     public void start() {
-
+        System.out.println("Starting client chat");
+        associatedClient.associatedChat = this;
         try {
             javax.swing.UIManager.setLookAndFeel(FlatDarkLaf.class.getName());
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -192,11 +196,15 @@ public class ClientChat extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ClientChat().setVisible(true);
+                setVisible(true);
             }
         });
 
-
+        new Thread(new Runnable() {
+            public void run() {
+                associatedClient.recieveMessages();
+            } 
+        }).start();
     }
 
     ControlClient associatedClient;

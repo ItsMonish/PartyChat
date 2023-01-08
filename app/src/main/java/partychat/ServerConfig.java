@@ -1,9 +1,23 @@
 package partychat;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+
 import com.formdev.flatlaf.FlatDarkLaf;
 
 public class ServerConfig extends javax.swing.JFrame {
-    public ServerConfig() {
+    public ServerConfig()  {
+        String[] interfaceNames = new String[10];
         initComponents();
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            int i = 0;
+            while( interfaces.hasMoreElements() ) {
+                interfaceNames[i] = interfaces.nextElement().getDisplayName();
+                i = i + 1;
+            }
+        } catch( Exception e ) { }
+        interfaceList.setListData(interfaceNames);
     }
 
     private void initComponents() {
@@ -63,11 +77,6 @@ public class ServerConfig extends javax.swing.JFrame {
         jLabel5.setFont(jLabel5.getFont().deriveFont(jLabel5.getFont().getSize()+1f));
         jLabel5.setText("Choose Interface to Listen on:");
 
-        interfaceList.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         interfaceList.setFixedCellWidth(200);
         interfaceList.setVisibleRowCount(-1);
         jScrollPane1.setViewportView(interfaceList);
@@ -146,7 +155,6 @@ public class ServerConfig extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
         ControlServer newServer = new ControlServer();
-        ServerChat newServerChat = new ServerChat();
         newServer.setUserServer();
         if( openServerCheckbox.isSelected() ) {
             newServer.setServerPassword("");
@@ -155,8 +163,12 @@ public class ServerConfig extends javax.swing.JFrame {
         }
         newServer.setServerName(serverName.getText());
         newServer.setUserName(serverUserName.getText());
-        newServerChat.associatedServer = newServer;
-        newServerChat.start();
+        try {
+            newServer.setInterface(NetworkInterface.getByName(interfaceList.getSelectedValue()));
+        } catch (SocketException e) {}
+        ServerChat newServerChat = new ServerChat(newServer);
+        newServer.associatedChat = newServerChat;
+        newServerChat.start(newServer);
         this.dispose();
     }
 

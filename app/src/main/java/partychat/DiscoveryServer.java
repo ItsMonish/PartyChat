@@ -7,11 +7,12 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 
-public class DiscoveryServer extends ControlClass implements Runnable {
+public class DiscoveryServer {
     
     DatagramSocket discoverySocket;
     NetworkInterface thisInterface;
     boolean DISCOVERY_FLAG;
+    ControlServer associatedServer;
 
     public DiscoveryServer() throws SocketException {
         discoverySocket = new DatagramSocket(2022);
@@ -22,22 +23,23 @@ public class DiscoveryServer extends ControlClass implements Runnable {
         this.thisInterface = newInterface;
     }
 
-    public void run() {
+    public void setAssociatedServer(ControlServer associated) {
+        this.associatedServer = associated;
+    }
+
+    public void initDiscovery() {
         try {
-            while(true) {
+            System.out.println("Interface in use: "+thisInterface.getName());
+            while(DISCOVERY_FLAG) {
                 byte[] buffer = new byte[100];
                 DatagramPacket recieved = new DatagramPacket(buffer, 100);
                 discoverySocket.receive(recieved);
                 InetAddress sender = recieved.getAddress();
                 String content = new String(recieved.getData(),0,recieved.getLength()).trim();
                 if (content.equals(OPCodes.SERVER_DISCOVERY+"")) {
-                    byte[] responseContent =  getServerName().getBytes();
+                    byte[] responseContent =  associatedServer.getServerName().getBytes();
                     DatagramPacket response = new DatagramPacket(responseContent, responseContent.length, sender, 2022);
                     discoverySocket.send(response);
-                }
-                if( Thread.currentThread().isInterrupted() ) {
-                    discoverySocket.close();
-                    break;
                 }
             }
         } catch ( IOException e ) {

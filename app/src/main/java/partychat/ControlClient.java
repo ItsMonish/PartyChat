@@ -1,10 +1,9 @@
 package partychat;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -13,19 +12,23 @@ public class ControlClient extends ControlClass {
     Socket connection;
     InetAddress serverIP;
     BufferedReader socketIn;
-    BufferedWriter socketOut;
+    PrintWriter socketOut;
     ClientChat associatedChat;
+    boolean CLIENT_FLAG;
 
     public ControlClient(InetAddress serverAddress) throws IOException {
         this.serverIP = serverAddress;
+        CLIENT_FLAG = true;
         connection = new Socket(serverIP, DEFAULT_PORT);
         socketIn = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        socketOut = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+        socketOut = new PrintWriter(connection.getOutputStream(),true);
     }
 
     public int createConnection(String userName, String password) throws IOException {
-        socketOut.write(OPCodes.CONNECTION_REQUEST + userName+"||"+password);
+        socketOut.println(OPCodes.CONNECTION_REQUEST + userName+"::"+password);
+        System.out.println("wrote to server buffer");
         String response = socketIn.readLine();
+        System.out.println("Response recieved is :"+response);
         if( response.equals((OPCodes.CLIENT_ACCEPTED+"")) ) {
             return 1;
         } else if ( response.equals(OPCodes.CLIENT_DENIED+"") ) { 
@@ -36,15 +39,17 @@ public class ControlClient extends ControlClass {
     }
 
     public void sendMessage(String Message) {
-        try {
-            socketOut.write(OPCodes.CHAT_ROOM_MESSAGE+Message+'\n');
-        } catch ( IOException e ) { }  
+        socketOut.println(OPCodes.CHAT_ROOM_MESSAGE+Message);
     }
 
-    public void recieveMessages() throws IOException {
-        String inboundMessage;
-        while ( (inboundMessage = socketIn.readLine()) != null ) {
-            associatedChat.chatRoom.append(inboundMessage+'\n');
+    public void recieveMessages() {
+        while(CLIENT_FLAG) {
+            String inboundMessage;
+            try {
+                inboundMessage = socketIn.readLine();
+                System.out.println("Recieved:"+inboundMessage);
+                associatedChat.chatRoom.append(inboundMessage+"\n");
+            } catch (IOException e) { e.printStackTrace(); }
         }
     }
 
@@ -54,6 +59,6 @@ public class ControlClient extends ControlClass {
             socketIn.close();
             socketOut.close();
             connection.close();
-        } catch ( IOException e ) { }    
+        } catch ( IOException e ) { e.printStackTrace(); }    
     }
 }

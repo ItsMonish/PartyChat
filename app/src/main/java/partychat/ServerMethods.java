@@ -1,32 +1,28 @@
 package partychat;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
 
-public class ServerMethods extends Thread{
+public class ServerMethods{
     Socket thisSocket;
     BufferedReader serverIn;
-    BufferedWriter serverOut;
-    ArrayList<Message> buffer;
-    ArrayList<String> OutboundBuffer;
+    PrintWriter serverOut;
     InetAddress associatedIP;
+    ControlServer associatedServer;
 
-    public ServerMethods(Socket socket, ArrayList<Message> msgBuffer) throws IOException {
+    public ServerMethods(Socket socket,ControlServer associated) throws IOException {
         this.thisSocket = socket;
-        this.buffer = msgBuffer;
-        this.OutboundBuffer = new ArrayList<String>();
+        this.associatedServer = associated;
         associatedIP = socket.getInetAddress();
         serverIn = new BufferedReader(new InputStreamReader(thisSocket.getInputStream()));
-        serverOut = new BufferedWriter(new OutputStreamWriter(thisSocket.getOutputStream()));
+        serverOut = new PrintWriter(thisSocket.getOutputStream(),true);
     }
 
-    public void run() {
+    public void initListening() {
         try {
             while(true) {
                 String InboundMessage;
@@ -35,10 +31,7 @@ public class ServerMethods extends Thread{
                     newmsg.setOP(InboundMessage.charAt(0));
                     newmsg.setSender(associatedIP);
                     newmsg.setMessage(InboundMessage.substring(1));
-                    buffer.add(newmsg);
-                }
-                if ( !OutboundBuffer.isEmpty() ) {
-                    serverOut.write(OutboundBuffer.remove(0)+'\n');
+                    associatedServer.messageBuffer.add(newmsg);
                 }
                 if ( Thread.currentThread().isInterrupted() ) {
                     Thread.sleep(2000);

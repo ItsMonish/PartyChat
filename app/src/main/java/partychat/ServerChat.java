@@ -5,8 +5,10 @@ import com.formdev.flatlaf.FlatDarkLaf;
 
 public class ServerChat extends javax.swing.JFrame {
 
-    public ServerChat() {
+    public ServerChat(ControlServer associated) {
         initComponents();
+        System.out.println("Server Chat inited");
+        this.associatedServer = associated;
         serverName.setText(associatedServer.getServerName());
         if ( associatedServer.getServerPassword().equals("") ) {
             serverPass.setText("");
@@ -247,7 +249,8 @@ public class ServerChat extends javax.swing.JFrame {
     }
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        associatedServer.broadCastToChatRoom("", sendMessage.getText());
+        associatedServer.broadCastToChatRoom(null, sendMessage.getText());
+        sendMessage.setText("");
     }
 
     private void searchUsersKeyTyped(java.awt.event.KeyEvent evt) {
@@ -269,6 +272,12 @@ public class ServerChat extends javax.swing.JFrame {
         if( res == JOptionPane.YES_OPTION ) {
             associatedServer.SERVER_FLAG = false;
             associatedServer.terminateServer();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) { e.printStackTrace(); }
+            MainWindow obj = new MainWindow();
+            obj.start();
+            this.dispose();
         }
     }
 
@@ -281,16 +290,17 @@ public class ServerChat extends javax.swing.JFrame {
                 associatedServer.discoveryInstance.DISCOVERY_FLAG = true;
                 associatedServer.discoveryInstance.notify();
             }
-        } catch (Exception e) { }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void sendMessageKeyPressed(java.awt.event.KeyEvent evt) {
         if ( evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-            associatedServer.broadCastToChatRoom("", sendMessage.getText());
+            associatedServer.broadCastToChatRoom(null, sendMessage.getText());
+            sendMessage.setText("");
         }
     }
 
-    public void start() {
+    public void start(ControlServer associated) {
         try {
             javax.swing.UIManager.setLookAndFeel(FlatDarkLaf.class.getName());
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -313,17 +323,19 @@ public class ServerChat extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ServerChat().setVisible(true);
+                setVisible(true);
             }
         });
 
         new Thread( new Runnable() {
             public void run() {
+                associated.initAction();
+                associated.actionInbounds();
                 while(associatedServer.SERVER_FLAG) {
                     jList1.setListData((String[])associatedServer.connectedClients.values().toArray());
                     try {
                         Thread.sleep(5000);
-                    } catch ( InterruptedException e ) { }
+                    } catch ( InterruptedException e ) { e.printStackTrace(); }
                 }
           }  
         }).start();

@@ -1,6 +1,7 @@
 package partychat;
 
 import java.net.SocketException;
+import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import com.formdev.flatlaf.FlatDarkLaf;
 
@@ -14,14 +15,15 @@ public class ClientConnection extends javax.swing.JFrame {
         DISCOVERY_FLAG = true;
         try {
             discovery = new DiscoveryClient();
-        } catch ( SocketException e ) {}
+        } catch ( SocketException e ) { e.printStackTrace(); }
     }
 
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        serverLists = new javax.swing.JList<>();
+        listModel = new DefaultListModel<String>();
+        serverLists = new javax.swing.JList<String>(listModel);
         jLabel2 = new javax.swing.JLabel();
         serverPassword = new javax.swing.JPasswordField();
         jButton1 = new javax.swing.JButton();
@@ -52,6 +54,11 @@ public class ClientConnection extends javax.swing.JFrame {
 
         jButton1.setText("< Back");
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Connect");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -121,16 +128,20 @@ public class ClientConnection extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             String selectedServer = serverLists.getSelectedValue();
+            System.out.println("Selected value:"+selectedServer);
             String password = new String(serverPassword.getPassword());
             String clientName = userName.getText();
+            System.out.println("Selected username:"+clientName);
+            System.out.println("IP:"+discovery.serversIP.get(selectedServer).toString());
             ControlClient newClient = new ControlClient(discovery.serversIP.get(selectedServer));
             newClient.setServerName(selectedServer);
             newClient.setServerPassword(password);
             newClient.setUserName(clientName);
             newClient.setUserClient();
-            ClientChat newClientChat = new ClientChat();
-            newClientChat.associatedClient = newClient;
+            ClientChat newClientChat = new ClientChat(newClient);
+            System.out.println("Initiating connection request");
             int res = newClient.createConnection(clientName,password);
+            System.out.println("Response for connection:"+res);
             if(res == 1) {
                 newClientChat.start();
                 this.dispose();
@@ -139,9 +150,15 @@ public class ClientConnection extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "No reponse from server. Make sure it is up and try again");
             }
-        } catch( Exception e ) { }
+        } catch( Exception e ) { e.printStackTrace(); }
     }
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+        MainWindow obj = new MainWindow();
+        obj.setVisible(true);
+        DISCOVERY_FLAG = false;
+        this.dispose();
+    }
 
     public void start() {
 
@@ -165,22 +182,31 @@ public class ClientConnection extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ClientConnection().setVisible(true);
+                setVisible(true);
+            }
+        });
+
+        Thread discoveryThread = new Thread(new Runnable() {
+            @Override public void run() {
+                discovery.run();
             }
         });
 
         new Thread(new Runnable() {
-            public void run(){
-                discovery.run();
-                while(DISCOVERY_FLAG) {
-                    serverLists.setListData(discovery.servers);
-                    try {
-                        Thread.sleep(5000);
-                    } catch (Exception e) { }
+           @Override public void run() {
+            while(DISCOVERY_FLAG) {
+                listModel.removeAllElements();
+                for(String name: discovery.serverlist) {
+                    listModel.addElement(name);
                 }
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e ) { e.printStackTrace(); }
             }
-        }).start();;
+           } 
+        }).start();
 
+        discoveryThread.start();
     }
 
     private boolean DISCOVERY_FLAG;
@@ -194,5 +220,6 @@ public class ClientConnection extends javax.swing.JFrame {
     private javax.swing.JList<String> serverLists;
     private javax.swing.JPasswordField serverPassword;
     private javax.swing.JTextField userName;
+    private javax.swing.DefaultListModel<String> listModel;
 
 }
