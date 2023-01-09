@@ -49,7 +49,7 @@ public class ControlClient extends ControlClass {
                     associatedChat.serverTerminated();
                     return;
                 }
-                associatedChat.chatRoom.append(inboundMessage);
+                associatedChat.chatRoom.append(inboundMessage+"\n");
                 associatedChat.jScrollPane1.getVerticalScrollBar().setValue(associatedChat.jScrollPane1.getMaximumSize().height);
             } catch (IOException e) { }
         }

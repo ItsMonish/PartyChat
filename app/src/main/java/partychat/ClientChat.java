@@ -33,6 +33,7 @@ public class ClientChat extends javax.swing.JFrame {
         chatRoom.setColumns(20);
         chatRoom.setRows(5);
         chatRoom.setEditable(false);
+        chatRoom.setLineWrap(true);
         jScrollPane1.setViewportView(chatRoom);
 
         chatRoomSendButton.setText("Send");

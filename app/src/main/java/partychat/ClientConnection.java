@@ -144,6 +144,9 @@ public class ClientConnection extends javax.swing.JFrame {
                 this.dispose();
             } else if (res == -1) {
                 JOptionPane.showMessageDialog(this, "The connection was refused. Please check your password.");
+                newClient.terminateConnection();
+                newClient.connection.close();
+                return;
             } else {
                 JOptionPane.showMessageDialog(this, "No reponse from server. Make sure it is up and try again");
             }
@@ -152,6 +155,7 @@ public class ClientConnection extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
         MainWindow obj = new MainWindow();
+        discovery.clientSocket.close();
         obj.setVisible(true);
         DISCOVERY_FLAG = false;
         this.dispose();
